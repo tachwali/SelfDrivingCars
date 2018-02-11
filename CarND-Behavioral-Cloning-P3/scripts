@@ -1,0 +1,23 @@
+ssh carnd@<ip-address>
+source activate carnd-term1
+git clone <>
+wget https.... traffic data
+unzip traffic-signs
+
+
+project repo: https://github.com/udacity/CarND-Behavioral-Cloning-P3
+git@github.com:udacity/CarND-Behavioral-Cloning-P3.git
+
+Data:
+https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip
+
+scp -v CarND-Behavioral-Cloning-P3.zip carnd@52.53.204.16:.
+unzip CarND-Behavioral-Cloning-P3.zip -d .
+conda install -c menpo opencv
+conda install keras
+unzip data.zip -d .
+
+The TensorFlow library wasn't compiled to use SSE4.1 instructions, but these are available on your machine and could speed up CPU computations.
+2018-02-11 06:48:48.951944: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use SSE4.2 instructions, but these are available on your machine and could speed up CPU computations.
+2018-02-11 06:48:48.951960: W tensorflow/core/platform/cpu_feature_guard.cc:45] The TensorFlow library wasn't compiled to use AVX instructions, but these are available on your machine and could speed up CPU computations.
+
