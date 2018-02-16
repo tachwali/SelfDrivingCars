@@ -5,50 +5,46 @@ from keras.models import Sequential
 from keras.layers import Flatten, Dense, Lambda
 from keras.layers import Conv2D, MaxPooling2D, Cropping2D
 from keras.layers import Activation, Dropout, BatchNormalization
+from keras.callbacks import ModelCheckpoint
 
-lines = []
-with open('data/driving_log.csv') as csvfile:
-	reader = csv.reader(csvfile)
-	# skip first line
-	first_line = next(reader)
-	for line in reader:
-		lines.append(line)
+import data_util as ut
 
-images = []
-measurements = []
-for line in lines:
-	source_path = line[0]
-	#print(source_path)
-	filename = source_path.split('/')[-1]
-	current_path = './data/IMG/' + filename
-	image = cv2.imread(current_path)
-	images.append(image)
-	measurement = float(line[3])
-	measurements.append(measurement)
+## read in the training data and split into train and validation  
 
-X_train = np.array(images)
-y_train = np.array(measurements)
+csv_file_path = './data/driving_log.csv'
+train_observations, validation_observations = ut.get_train_validate_lines(csv_file_path)
+
+## distribute data
+train_observations = ut.distribute_data(train_observations)
+
+## create data generators
+train_generator = ut.generate_data(train_observations)
+validation_generator = ut.generate_data(validation_observations)
 
 
 
 model = Sequential()
-model.add(Lambda(lambda x: x / 255.0 - 0.5, input_shape=(160,320,3)))
+# model.add(BatchNormalization())
 
+model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=(80,320,3)))
+# model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(3,160,320)))
+
+# what is the differece between relu and elu?
 ## convolutional layers
-model.add(Conv2D(24, 5, 5, subsample=(2,2), activation='elu'))
-model.add(Conv2D(36, 5, 5, subsample=(2,2), activation='elu'))
-model.add(Conv2D(48, 5, 5, subsample=(2,2), activation='elu'))
-model.add(Conv2D(64, 3, 3, activation='elu'))
-model.add(Conv2D(64, 3, 3, activation='elu'))
+model.add(Conv2D(24, 5, 5, subsample=(2,2), activation='relu'))  
+model.add(Conv2D(36, 5, 5, subsample=(2,2), activation='relu'))  
+model.add(Conv2D(48, 5, 5, subsample=(2,2), activation='relu'))  
+model.add(Conv2D(64, 3, 3, activation='relu'))
+model.add(Conv2D(64, 3, 3, activation='relu'))
 
 ## dropout
 model.add(Dropout(0.5))
 
 ## fully connected layers
 model.add(Flatten())
-model.add(Dense(100, activation='elu'))
-model.add(Dense(50, activation='elu'))
-model.add(Dense(10, activation='elu'))
+model.add(Dense(100, activation='relu'))
+model.add(Dense(50, activation='relu'))
+model.add(Dense(10, activation='relu'))
 model.add(Dense(1))
 
 """
@@ -57,10 +53,21 @@ model.add(Dense(1))
 """
 
 
-model.compile(loss='mse', optimizer='adam')
-model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7)
 
-model.save('model.h5')
+#model.fit(X_train, y_train, validation_split=0.2, shuffle=True, nb_epoch=7)
+## fit the model
+model_path = "model.h5"
+#checkpoint = ModelCheckpoint(model_path, verbose=0, save_best_only=True)
+#callbacks_list = [checkpoint]
+
+#model.fit_generator(train_generator, samples_per_epoch=len(train_observations), validation_data=validation_generator,
+#                    nb_val_samples=len(validation_observations), nb_epoch=5, callbacks=callbacks_list)
+
+model.compile(loss='mse', optimizer='adam')
+model.fit_generator(train_generator, samples_per_epoch=len(train_observations), validation_data=validation_generator,
+                    nb_val_samples=len(validation_observations), nb_epoch=5, verbose = 1)
+
+#model.save('model.h5')
 
 #To run: python drive.py model.h5
 
