@@ -16,8 +16,8 @@ def get_train_validate_lines(csv_file_path):
     ''' reading all lines of input csv file data, shuffle lines and split them into training and validation lines  
         csv_file_path: path to csv file
     Returns
-        train_lines: numpy array of training lines
-        validation_lines: numpy array of validation lines
+        train_lines: training lines as numpy array 
+        validation_lines: validation lines as numpy array
     '''
 
     lines = []
@@ -67,7 +67,7 @@ def generate_data(observations, batch_size=128):
 
     Returns
         X: image array in batches as a list
-        y: steering angle list 
+        y: steering angle as a list 
     '''
 
     ## applying correction to left and right steering angles
