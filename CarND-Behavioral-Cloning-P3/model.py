@@ -7,7 +7,6 @@ from keras.layers import Conv2D, MaxPooling2D, Cropping2D
 from keras.layers import Activation, Dropout, BatchNormalization
 from keras.callbacks import ModelCheckpoint
 import pickle
-
 import data_util as ut
 
 ## read in the training data and split into train and validation  
@@ -67,7 +66,12 @@ history_object = model.fit_generator(train_generator, samples_per_epoch=len(trai
 
 model.save('model.h5')
 
-pickle.dump( history_object, open( "model_history.p", "wb" ) )
+pickle_file = 'model_history.p'
+with open(pickle_file, 'wb') as file_pi:
+        pickle.dump(history_object.history, file_pi)
+
+
+print('Model history is cached in pickle file.')
 
 #To run: python drive.py model.h5
 
