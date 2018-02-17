@@ -94,8 +94,28 @@ The goals / steps of this project are the following:
 ## Details About Files In This Directory
 
 ### `model.py`
+used to create and train keras network model based on NVIDIA architecture. The input data is preprocessed by normalization and cropped to improve performance. Further preprocessing can be applied such as equalizing the data to make sure the distribution of steering angles is uniform across all training samples.
+
+### `viz.ipynb`
+used to visualize keras netowrk model summary and training history
 
 ### `data_util.py`
+Contains the following helper functions:
+```
+get_train_validate_lines(csv_file_path)
+```
+used for reading all lines of input csv file data, shuffle lines and split them into training and validation lines 
+
+```
+preprocess_image(img, color_conversion=cv2.COLOR_BGR2YUV)
+```
+used to convert color of the input image and crop
+
+```
+generate_data(observations, batch_size=128)
+```
+which is a data generator in batches to be fed into the Keras fit_generator object
+
 
 ### `drive.py`
 
