@@ -6,6 +6,7 @@ from keras.layers import Flatten, Dense, Lambda
 from keras.layers import Conv2D, MaxPooling2D, Cropping2D
 from keras.layers import Activation, Dropout, BatchNormalization
 from keras.callbacks import ModelCheckpoint
+import pickle
 
 import data_util as ut
 
@@ -61,10 +62,12 @@ model_path = "model.h5"
 #                    nb_val_samples=len(validation_observations), nb_epoch=5, callbacks=callbacks_list)
 
 model.compile(loss='mse', optimizer='adam')
-model.fit_generator(train_generator, samples_per_epoch=len(train_observations), validation_data=validation_generator,
+history_object = model.fit_generator(train_generator, samples_per_epoch=len(train_observations), validation_data=validation_generator,
                     nb_val_samples=len(validation_observations), nb_epoch=5, verbose = 1)
 
 model.save('model.h5')
+
+pickle.dump( history_object, open( "model_history.p", "wb" ) )
 
 #To run: python drive.py model.h5
 
