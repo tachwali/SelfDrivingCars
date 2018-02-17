@@ -67,7 +67,7 @@ history_object = model.fit_generator(train_generator, samples_per_epoch=len(trai
 
 model.save('model.h5')
 
-pickle_file = model_history.
+pickle_file = 'model_history.p'
 if not os.path.isfile(pickle_file):
     print('Saving model history to pickle file...')
     try:
