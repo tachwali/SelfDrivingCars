@@ -15,7 +15,7 @@ csv_file_path = './data/driving_log.csv'
 train_observations, validation_observations = ut.get_train_validate_lines(csv_file_path)
 
 ## distribute data
-train_observations = ut.distribute_data(train_observations)
+#train_observations = ut.distribute_data(train_observations)
 
 ## create data generators
 train_generator = ut.generate_data(train_observations)
