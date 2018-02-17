@@ -67,7 +67,21 @@ history_object = model.fit_generator(train_generator, samples_per_epoch=len(trai
 
 model.save('model.h5')
 
-pickle.dump( history_object, open( "model_history.p", "wb" ) )
+pickle_file = model_history.
+if not os.path.isfile(pickle_file):
+    print('Saving model history to pickle file...')
+    try:
+        with open(pickle_file, 'wb') as pfile:
+            pickle.dump(
+                {
+                    'model_history': history_object
+                },
+                pfile, pickle.HIGHEST_PROTOCOL)
+    except Exception as e:
+        print('Unable to save data to', pickle_file, ':', e)
+        raise
+
+print('Model history is cached in pickle file.')
 
 #To run: python drive.py model.h5
 
