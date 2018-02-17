@@ -1,12 +1,53 @@
 # Behaviorial Cloning Project
+Udacity Self Driving Car Nanodegree - Behavioral Cloning
 
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# Prerequisites
+
+To run this project, you need [Miniconda](https://conda.io/miniconda.html) installed(please visit [this link](https://conda.io/docs/install/quick.html) for quick installation instructions.)
+
+# Installation
+To create an environment for this project use the following command on the platform:
+
+```
+conda env create -f environment.yml
+```
+
+
+After the environment is created, it needs to be activated with the command:
+
+```
+source activate py35
+```
+
+*Note: environment_aws.yml is the conda environment of aws carnd ami that was used for training* 
 
 Overview
 ---
 This repository contains starting files for the Behavioral Cloning Project.
 
-In this project, you will use what you've learned about deep neural networks and convolutional neural networks to clone driving behavior. You will train, validate and test a model using Keras. The model will output a steering angle to an autonomous vehicle.
+In this project, deep neural networks and convolutional neural networks are used to clone driving behavior. The architecture of the network used in this project is [NVIDIA arcitecture](https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf). 
+
+The project is conducted in two stages:
+##1- Training:
+The network is first trained using training [data](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip) provided with the project. Further training data could've been generated also using the simulator included in this project.
+Training was conducted using aws cloud computing services. EC2 node is created with the following configurations:
+* AMI: udacity-carnd - ami-c4c4e3a4
+* Hardware: g2.8xlarge
+* Environment: check environment_aws.yml
+Training such a network on the training [data](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip) took few minutes using g2.8xlarge as compared to almost 48 hours on an 8 core i7 machine with 32GB ram. The key is to leverage the GPU hardware as much as possible by making sure of using tensorflow-gpu and keras-gpu installation.
+
+The training is done by running the following command:
+```
+python model.py
+```
+
+At the end of executing the script, a trained model descriptor is created (model.h5). 
+
+*Note:I found that this file is sensitive to keras version so make sure to have the same keras version used to save and load this h5 file.*
+
+
+##2- Testing
+The model will output a steering angle to an autonomous vehicle.
 
 We have provided a simulator where you can steer a car around a track for data collection. You'll use image data and steering angles to train a neural network and then use this model to drive the car autonomously around the track.
 
@@ -20,14 +61,6 @@ To meet specifications, the project will require submitting five files:
 * video.mp4 (a video recording of your vehicle driving autonomously around the track for at least one full lap)
 
 This README file describes how to output the video in the "Details About Files In This Directory" section.
-
-Creating a Great Writeup
----
-A great writeup should include the [rubric points](https://review.udacity.com/#!/rubrics/432/view) as well as your description of how you addressed each point.  You should include a detailed description of the code used (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
-
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
-
-You're not required to use markdown for your writeup.  If you use another method please just submit a pdf of your writeup.
 
 The Project
 ---
