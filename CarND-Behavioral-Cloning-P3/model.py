@@ -7,7 +7,7 @@ from keras.layers import Conv2D, MaxPooling2D, Cropping2D
 from keras.layers import Activation, Dropout, BatchNormalization
 from keras.callbacks import ModelCheckpoint
 import pickle
-
+import os
 import data_util as ut
 
 ## read in the training data and split into train and validation  
