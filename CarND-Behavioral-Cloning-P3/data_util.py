@@ -148,25 +148,25 @@ def generate_data(observations, batch_size=128):
                 left_image_path = './data/IMG/'+observation[1].split('/')[-1]
                 right_image_path = './data/IMG/'+observation[2].split('/')[-1]
 		
-		center = preprocess_image(cv2.imread(center_image_path))
-		left = preprocess_image(cv2.imread(left_image_path))
-		right = preprocess_image(cv2.imread(right_image_path))
-		center_observation = float(observation[3])
-		left_observation = center_observation + steering_correction
-		right_observation = center_observation - steering_correction
+                center = preprocess_image(cv2.imread(center_image_path))
+                left = preprocess_image(cv2.imread(left_image_path))
+                right = preprocess_image(cv2.imread(right_image_path))
+                center_observation = float(observation[3])
+                left_observation = center_observation + steering_correction
+                right_observation = center_observation - steering_correction
 		
                 center_images.append(center)
                 steering_angle_center.append(center_observation))
 
 		## append the steering angles and correct for left/right images
-		left_images.append(left)
+                left_images.append(left)
                 steering_angle_left.append(left_observation)
                 right_images.append(right)
                 steering_angle_right.append(right_observation)
 	    	
 		## add flipped images
-		center_flipped, center_observation_flipped = flip_observation(center, center_observation)
-		center_images.append(center_flipped)
+                center_flipped, center_observation_flipped = flip_observation(center, center_observation)
+                center_images.append(center_flipped)
                 steering_angle_center.append(center_observation_flipped)
 		
 		left_flipped, left_observation_flipped = flip_observation(left, left_observation)
