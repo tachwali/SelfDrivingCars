@@ -96,6 +96,8 @@ The goals / steps of this project are the following:
 ### `model.py`
 used to create and train keras network model based on NVIDIA architecture. The input data is preprocessed by normalization and cropped to improve performance. Further preprocessing can be applied such as equalizing the data to make sure the distribution of steering angles is uniform across all training samples.
 
+For optimization, AdamOptimizer is selected. It uses Kingma and Ba's Adam algorithm to control the learning rate. Adam offers several advantages over the simple tf.train.GradientDescentOptimizer. Foremost is that it uses moving averages of the parameters (momentum). Simply put, this enables Adam to use a larger effective step size, and the algorithm will converge to this step size without fine tuning. The main down side of the algorithm is that Adam requires more computation to be performed for each parameter in each training step (to maintain the moving averages and variance, and calculate the scaled gradient); and more state to be retained for each parameter (approximately tripling the size of the model to store the average and variance for each parameter). A simple tf.train.GradientDescentOptimizer could equally be used, but would require more hyperparameter tuning before it would converge as quickly
+
 ### `viz.ipynb`
 used to visualize keras netowrk model summary and training history
 
