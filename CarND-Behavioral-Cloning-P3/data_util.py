@@ -127,7 +127,7 @@ def generate_data(observations, batch_size=128):
     '''
 
     ## applying correction to left and right steering angles
-    steering_correction = 0.2 
+    steering_correction = 0.3 
     
     ## set up generator
     while True:
