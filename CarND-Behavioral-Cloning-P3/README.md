@@ -151,10 +151,10 @@ The results of training is provided below:
 ![Model Mean-square ](images/training_performance.png)
 
 #### Validation data
-The data is [splitted](data_util.py#L137) into training and validation data. Using 80% as training and 20% as validation.
+The data is [splitted](data_util.py#L137-L137) into training and validation data. Using 80% as training and 20% as validation.
 
 ### `viz.ipynb`
-used to visualize keras netowrk model summary and training history
+The notebook is ued to visualize keras netowrk model summary and training history
 
 ### `data_util.py`
 Contains the following helper functions:
