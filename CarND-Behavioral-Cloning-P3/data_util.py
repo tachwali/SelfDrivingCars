@@ -170,14 +170,14 @@ def generate_data(observations, batch_size=128):
                 steering_angle_center.append(center_observation_flipped)
 		
                 left_flipped, left_observation_flipped = flip_observation(left, left_observation)
-                left_images.append(left_flipped)
-                left_angle_center.append(left_observation_flipped)
+                right_images.append(left_flipped)
+                right_angle_center.append(left_observation_flipped)
 		
                 right_flipped, right_observation_flipped = flip_observation(right, right_observation)
-                right_images.append(right_flipped)
-                right_angle_center.append(right_observation_flipped)
+                left_images.append(right_flipped)
+                left_angle_center.append(right_observation_flipped)
 		
-            images = center_images + left_images + right_images
+            images = center_images + left_images + right_images 
             steering_angles = steering_angle_center + steering_angle_left + steering_angle_right
 
             X = np.array(images)
