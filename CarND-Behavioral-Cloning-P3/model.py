@@ -19,8 +19,8 @@ train_generator = ut.generate_data(train_observations)
 validation_generator = ut.generate_data(validation_observations)
 
 model = Sequential()
-
-model.add(Lambda(lambda x: x/127.5 - 1.0,input_shape=(80,320,3)))
+model.add(Lambda(lambda x: (x / 255.0) - 0.5, input_shape=(160,320,3)))
+model.add(Cropping2D(cropping=((50,20), (0,0)), input_shape=(3,160,320)))
 
 ## Use NVIDIA self driving car network architecture 
 ## https://images.nvidia.com/content/tegra/automotive/images/2016/solutions/pdf/end-to-end-dl-using-px.pdf

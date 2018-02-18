@@ -16,8 +16,8 @@ def get_train_validate_lines(csv_file_path):
     ''' reading all lines of input csv file data, shuffle lines and split them into training and validation lines  
         csv_file_path: path to csv file
     Returns
-        train_lines: training lines as numpy array 
-        validation_lines: validation lines as numpy array
+        train_lines: numpy array of training lines
+        validation_lines: numpy array of validation lines
     '''
 
     lines = []
@@ -54,9 +54,65 @@ def preprocess_image(img, color_conversion=cv2.COLOR_BGR2YUV):
     converted_img = cv2.cvtColor(img,color_conversion)
 
     ## crop the image 
-    cropped_img = converted_img[60:140,:,:]
+    #cropped_img = converted_img[60:140,:,:]
 
-    return cropped_img
+    return converted_img
+
+
+## create a relatively uniform distribution of steering angle observations
+def distribute_data(observations, min_needed=500, max_needed=750):
+    ''' create a relatively uniform distribution of images
+    Arguments
+        observations: the array of observation data that comes from the read input function
+        min_needed: minimum number of observations needed per bin in the histogram of steering angles
+        max_needed:: maximum number of observations needed per bin in the histogram of steering angles
+
+    Returns
+        observations_output: output of augmented data observations
+    '''
+    
+    observations_output = observations.copy()
+    
+    ## create histogram to know what needs to be added
+    steering_angles = np.asarray(observations_output[:,3], dtype='float')
+    num_hist, idx_hist = np.histogram(steering_angles, 14)
+    
+    to_be_added = np.empty([1,7])
+    to_be_deleted = np.empty([1,1])
+    
+    for i in range(1, len(num_hist)):
+        if num_hist[i-1]<min_needed:
+
+            ## find the index where values fall within the range 
+            match_idx = np.where((steering_angles>=idx_hist[i-1]) & (steering_angles<idx_hist[i]))[0]
+
+            ## randomly choose up to the minimum needed
+            #print("a",match_idx,min_needed-num_hist[i-1])
+            #print("a",np.random.choice(match_idx,min_needed-num_hist[i-1]))
+            need_to_add = observations_output[np.random.choice(match_idx,min_needed-num_hist[i-1]),:]
+            
+            to_be_added = np.vstack((to_be_added, need_to_add))
+
+        elif num_hist[i-1]>max_needed:
+            
+            ## find the index where values fall within the range 
+            match_idx = np.where((steering_angles>=idx_hist[i-1]) & (steering_angles<idx_hist[i]))[0]
+            
+            ## randomly choose up to the minimum needed
+            #print(match_idx,num_hist[i-1])
+            #print(np.random.choice(match_idx,num_hist[i-1]-max_needed))
+            to_be_deleted = np.append(to_be_deleted, np.random.choice(match_idx,num_hist[i-1]-max_needed))
+
+    ## delete the randomly selected observations that are overrepresented and append the underrepresented ones
+    observations_output = np.delete(observations_output, to_be_deleted, 0)
+    observations_output = np.vstack((observations_output, to_be_added[1:,:]))
+    
+    return observations_output
+
+def flip_observation(img, measurement):
+    image_flipped = np.fliplr(img)
+    measurement_flipped = -measurement
+    return image_flipped, measurement_flipped
 
 ## data generator
 def generate_data(observations, batch_size=128):
@@ -67,7 +123,7 @@ def generate_data(observations, batch_size=128):
 
     Returns
         X: image array in batches as a list
-        y: steering angle as a list 
+        y: steering angle list 
     '''
 
     ## applying correction to left and right steering angles
