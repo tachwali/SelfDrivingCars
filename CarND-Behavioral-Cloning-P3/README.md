@@ -94,7 +94,55 @@ The goals / steps of this project are the following:
 ## Details About Files In This Directory
 
 ### `model.py`
-used to create and train keras network model based on NVIDIA architecture. The input data is preprocessed by normalization and cropped to improve performance. Further preprocessing can be applied such as equalizing the data to make sure the distribution of steering angles is uniform across all training samples.
+#### Model
+used to create and train keras network model based on NVIDIA architecture. A summary of the architecture is provided below. Note that an additional preprocessing layer is added at the top. The preprocessing is discussed in the next section. 
+```
+Layer (type)                     Output Shape          Param #     Connected to                     
+====================================================================================================
+lambda_1 (Lambda)                (None, 160, 320, 3)   0           lambda_input_2[0][0]             
+____________________________________________________________________________________________________
+cropping2d_1 (Cropping2D)        (None, 90, 320, 3)    0           lambda_1[0][0]                   
+____________________________________________________________________________________________________
+convolution2d_1 (Convolution2D)  (None, 43, 158, 24)   1824        cropping2d_1[0][0]               
+____________________________________________________________________________________________________
+convolution2d_2 (Convolution2D)  (None, 20, 77, 36)    21636       convolution2d_1[0][0]            
+____________________________________________________________________________________________________
+convolution2d_3 (Convolution2D)  (None, 8, 37, 48)     43248       convolution2d_2[0][0]            
+____________________________________________________________________________________________________
+convolution2d_4 (Convolution2D)  (None, 6, 35, 64)     27712       convolution2d_3[0][0]            
+____________________________________________________________________________________________________
+convolution2d_5 (Convolution2D)  (None, 4, 33, 64)     36928       convolution2d_4[0][0]            
+____________________________________________________________________________________________________
+flatten_1 (Flatten)              (None, 8448)          0           convolution2d_5[0][0]            
+____________________________________________________________________________________________________
+dense_1 (Dense)                  (None, 100)           844900      flatten_1[0][0]                  
+____________________________________________________________________________________________________
+dense_2 (Dense)                  (None, 50)            5050        dense_1[0][0]                    
+____________________________________________________________________________________________________
+dense_3 (Dense)                  (None, 10)            510         dense_2[0][0]                    
+____________________________________________________________________________________________________
+dense_4 (Dense)                  (None, 1)             11          dense_3[0][0]                    
+====================================================================================================
+Total params: 981,819
+Trainable params: 981,819
+Non-trainable params: 0
+```
+Note: one possible optimization is to do the cropping before lambda to avoid performing processing on pixels that will be thrown away by cropping.
+
+#### Preprocessing
+There are two levels of prepocessing that is done on the data: 1) offline preprocessing, which is done using a helper function "preprocess_image" in data_util.py to convert the color representation to COLOR_BGR2YUV. 2) online preprocessing: where input data is preprocessed by normalization and cropped to improve performance. 
+
+Further preprocessing can be applied such as equalizing the data to make sure the distribution of steering angles is uniform across all training samples. This preprocessing though should be done offline on training data and not meant to be part of the network architecture.
+
+#### Optimizer
+For optimization, AdamOptimizer is selected. It uses Kingma and Ba's Adam algorithm to control the learning rate. Adam offers several advantages over the simple tf.train.GradientDescentOptimizer. Foremost is that it uses moving averages of the parameters (momentum). Simply put, this enables Adam to use a larger effective step size, and the algorithm will converge to this step size without fine tuning. The main down side of the algorithm is that Adam requires more computation to be performed for each parameter in each training step (to maintain the moving averages and variance, and calculate the scaled gradient); and more state to be retained for each parameter (approximately tripling the size of the model to store the average and variance for each parameter). A simple tf.train.GradientDescentOptimizer could equally be used, but would require more hyperparameter tuning before it would converge as quickly
+
+### Training data 
+Training and validation data were generated based on the provided samples in [here](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip). 
+
+All three camera images (center, left, and right) where used in the training. A steering correction of +/-0.3 was added to steering measurement of left and right images. The value of steering correction was set based on trial and error. First I tried 0.2 which caused the car to be very close to side lines at sharp turns. Then I tried to reduce it to 0.12 which cause the vehicle to go off road at the same sharp turns. 
+
+In addition, the training data is augmented by flipping images (simulating driving in the opposite directions). However, in this case, flipped left images are treated as right images and vice vera. 
 
 ### `viz.ipynb`
 used to visualize keras netowrk model summary and training history
