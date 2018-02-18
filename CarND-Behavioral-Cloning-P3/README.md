@@ -129,20 +129,29 @@ Non-trainable params: 0
 ```
 Note: one possible optimization is to do the cropping before lambda to avoid performing processing on pixels that will be thrown away by cropping.
 
+I decided not to modify the model by applying regularization techniques like [Dropout](https://en.wikipedia.org/wiki/Dropout_(neural_networks)) or [Max pooling](https://en.wikipedia.org/wiki/Convolutional_neural_network#Max_pooling_shape). Instead, I decided to keep the training epochs low: only three epochs.
+
+
 #### Preprocessing
-There are two levels of prepocessing that is done on the data: 1) offline preprocessing, which is done using a helper function "preprocess_image" in data_util.py to convert the color representation to COLOR_BGR2YUV. 2) online preprocessing: where input data is preprocessed by normalization and cropped to improve performance. 
+There are two levels of prepocessing that is done on the data: 1) offline preprocessing, which is done using a helper function "[preprocess_image](data_util.py#L43-L59)" in data_util.py to convert the color representation to COLOR_BGR2YUV. 2) online preprocessing: where input data is preprocessed by normalization and cropped to improve performance. 
 
 Further preprocessing can be applied such as equalizing the data to make sure the distribution of steering angles is uniform across all training samples. This preprocessing though should be done offline on training data and not meant to be part of the network architecture.
 
 #### Optimizer
 For optimization, AdamOptimizer is selected. It uses Kingma and Ba's Adam algorithm to control the learning rate. Adam offers several advantages over the simple tf.train.GradientDescentOptimizer. Foremost is that it uses moving averages of the parameters (momentum). Simply put, this enables Adam to use a larger effective step size, and the algorithm will converge to this step size without fine tuning. The main down side of the algorithm is that Adam requires more computation to be performed for each parameter in each training step (to maintain the moving averages and variance, and calculate the scaled gradient); and more state to be retained for each parameter (approximately tripling the size of the model to store the average and variance for each parameter). A simple tf.train.GradientDescentOptimizer could equally be used, but would require more hyperparameter tuning before it would converge as quickly
 
-### Training data 
+#### Training data 
 Training and validation data were generated based on the provided samples in [here](https://d17h27t6h515a5.cloudfront.net/topher/2016/December/584f6edd_data/data.zip). 
 
 All three camera images (center, left, and right) where used in the training. A steering correction of +/-0.3 was added to steering measurement of left and right images. The value of steering correction was set based on trial and error. First I tried 0.2 which caused the car to be very close to side lines at sharp turns. Then I tried to reduce it to 0.12 which cause the vehicle to go off road at the same sharp turns. 
 
 In addition, the training data is augmented by flipping images (simulating driving in the opposite directions). However, in this case, flipped left images are treated as right images and vice vera. 
+
+The results of training is provided below:
+![Model Mean-square ](images/training_performance.png)
+
+#### Validation data
+The data is [splitted](data_util.py#L137) into training and validation data. Using 80% as training and 20% as validation.
 
 ### `viz.ipynb`
 used to visualize keras netowrk model summary and training history
