@@ -71,8 +71,8 @@ class Line():
         self.measurement_fifo_right.push(measurements[1])
         self.measurement_fifo_center.push(measurements[2])
         return [self.measurement_fifo_left.median(),
-                self.measurement_fifo_left.median(),
-                self.measurement_fifo_left.median()]
+                self.measurement_fifo_right.median(),
+                self.measurement_fifo_center.median()]
 
 
     def direction_sanity_check(self, left, right):
