@@ -280,9 +280,9 @@ def transform_image(img):
 
 
 def histogram(img):
-    '''
-    Take a histogram of the bottom half of the image
-    '''
+	'''
+	Take a histogram of the bottom half of the image
+	'''
 	return np.sum(img[img.shape[0]//2:,:], axis=0)
 
 
