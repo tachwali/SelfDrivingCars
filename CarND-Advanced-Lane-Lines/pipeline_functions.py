@@ -135,7 +135,7 @@ def detector_direction(img, sobel_kernel=3, thresh_min=0, thresh_max=np.pi/2):
     thresh_max: maximum detected direction angle in radian  
     ---
     Returns
-	A 2D numpy array of a binary image with non zero pixels with geadient
+	A 2D numpy array of a binary image with non zero pixels with gradient
 	at direction that fall within the min and max thresholds
     '''
     ## convert to grayscale
@@ -158,19 +158,22 @@ def detector_direction(img, sobel_kernel=3, thresh_min=0, thresh_max=np.pi/2):
     return binary_output
 
 
-def detector_combined(img, sobel_thresh=(20,100), sobel_kernel=3, 
-                         mag_thresh=(30,100), dir_thresh=(0.7, 1.3)):
+def detector_combined(img, sobel_thresh=(20,100), sobel_kernel=3, mag_thresh=(30,100)):
     '''
 	This detector combines the detections of three gradient detectors and 
 	mask the detection result to keep only the detection at non-black pixels	
     Inputs
     img: input image in RGB format
+    sobel_thresh:
+    sobel_kernel:
+    mag_thresh:
     orient: set it to 'x' or 'y' to detect edges along horizontal and vertical direction respectively
     thresh_min: minimum absolute value of a gradient to detect an edge 
     thresh_max: maximum absolute value of a gradient to detect an edge 
     ---
     Returns
-    undistorted image
+    A 2D numpy array of a binary image with non zero pixels with 
+    at detection pixel locations.
     '''    
     binary_output_sobel = detector_xy(img, 'x', sobel_thresh[0], sobel_thresh[1])
     binary_output_mag = detector_mag(img, sobel_kernel, mag_thresh[0], mag_thresh[1])
@@ -190,12 +193,12 @@ def detector_color(img, color_thresh_input=(170, 255)):
 	Color selection for yellow and white, using the HLS and HSV color space
     Inputs
     img: input image in RGB format
-    orient: set it to 'x' or 'y' to detect edges along horizontal and vertical direction respectively
-    thresh_min: minimum absolute value of a gradient to detect an edge 
-    thresh_max: maximum absolute value of a gradient to detect an edge 
+    thresh_min: minimum absolute value of Hue value to detect 
+    thresh_max: maximum absolute value of Hue value to detect 
     ---
     Returns
-    undistorted image
+    A 2D numpy array of a binary image with non zero pixels with 
+    at detection pixel locations.
     '''
     ## convert to HLS color space and separate the S channel
     hls_image = cv2.cvtColor(img, cv2.COLOR_BGR2HLS).astype(np.float)
@@ -223,25 +226,26 @@ def detector_color(img, color_thresh_input=(170, 255)):
 
     return combined_binary
 
-## combine the different thresholding options
-def detector_pipeline(img, sobel_thresh=(40,100), sobel_kernel=3, mag_thresh=(30,100), 
-                       dir_thresh=(0.7, 1.3), color_thresh_input=(170, 255)):
+
+def detector_pipeline(img, sobel_thresh=(40,100), sobel_kernel=3, mag_thresh=(30,100), color_thresh_input=(170, 255)):
     '''
+    This detector pipeline combines the detection from color detector and combined edge detectors  
     Inputs
     img: input image in RGB format
-    orient: set it to 'x' or 'y' to detect edges along horizontal and vertical direction respectively
-    thresh_min: minimum absolute value of a gradient to detect an edge 
-    thresh_max: maximum absolute value of a gradient to detect an edge 
+    sobel_thresh: a tuple of two intergers from 0 to 255 for min and max detection threshold based on sobel kernel
+    sobel_kernel: size of sobel kernel, this should be an odd integer value
+    mag_thresh: a tuple of two intergers from 0 to 255 for min and max detection threshold based on sobel kernel
+    color_thresh_input: min and max detection threshold of Hue values
     ---
     Returns
-    undistorted image
+    A 2D numpy array of a binary image with non zero pixels with 
+    at detection pixel locations.
     '''    
     ## denoise image
     img = cv2.fastNlMeansDenoisingColored(img,7,13,21,5)
     
     ## sobel, magnitude, direction threshold binary
-    combined_thresh_binary = detector_combined(img, sobel_thresh=(40,100), sobel_kernel=3, mag_thresh=(30,100), 
-                       dir_thresh=(0.7, 1.3))
+    combined_thresh_binary = detector_combined(img, sobel_thresh=(40,100), sobel_kernel=3, mag_thresh=(30,100))
     
     ## color threshold binary
     color_thresh_binary = detector_color(img, color_thresh_input=color_thresh_input)
@@ -252,7 +256,7 @@ def detector_pipeline(img, sobel_thresh=(40,100), sobel_kernel=3, mag_thresh=(30
     
     return combined_binary
     
-## transform image
+
 def transform_image(img):
 	'''
 	It would be nice to have calibration chess board to get the prospective automaticallly from detected corner points.
@@ -276,6 +280,9 @@ def transform_image(img):
 
 
 def histogram(img):
+    '''
+    Take a histogram of the bottom half of the image
+    '''
 	return np.sum(img[img.shape[0]//2:,:], axis=0)
 
 
@@ -365,48 +372,22 @@ def get_left_right_lane_points(img):
 	righty = nonzeroy[right_lane_inds]
 	left_points = {'x': leftx,'y': lefty}
 	right_points = {'x': rightx, 'y': righty } 
-	return {'left':left_points,
-		    'right':right_points, 
-			'out_img': out_img, 
-			'nonzerox':nonzerox, 
-			'nonzeroy':nonzeroy,
-			'left_lane_inds':left_lane_inds,
-			'right_lane_inds':right_lane_inds}
+	return {'left':left_points, 'right':right_points}, out_img
 
 def polyfit(points):
-#TODO: merge it with get_left_right_lane_points
+	#TODO: merge it with get_left_right_lane_points
 	# Fit a second order polynomial to each
 	left_fit = np.polyfit(points['left']['y'], points['left']['x'], 2)
 	right_fit = np.polyfit(points['right']['y'], points['right']['x'], 2)
 	return {'left':left_fit, 'right':right_fit}	
 
-def visualize_poly(handle, binary_warped, poly_fit, points):
-	# Generate x and y values for plotting
-	
-	left_lane_inds = points['left_lane_inds']
-	right_lane_inds = points['right_lane_inds']
-	out_img = points['out_img']
-	nonzerox = points['nonzerox']
-	nonzeroy = points['nonzeroy']
-	left_fit = poly_fit['left']
-	right_fit = poly_fit['right']
-	ploty = np.linspace(0, binary_warped.shape[0]-1, binary_warped.shape[0] )
-	left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-	right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
 
-	out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
-	out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
-	handle.imshow(out_img)
-	handle.plot(left_fitx, ploty, color='yellow')
-	handle.plot(right_fitx, ploty, color='yellow')
-
-def visualize_poly2(handle, poly_fit, points):
+def visualize_poly(handle, out_img, poly_fit, points):
 	leftx = points['left']['x']
 	lefty = points['left']['y']
 	rightx = points['right']['x']
 	righty = points['right']['y']
-
-	out_img = points['out_img']
+	
 	left_fit = poly_fit['left']
 	right_fit = poly_fit['right']
 
@@ -445,19 +426,19 @@ def get_next_left_right_lane_points(img, poly_fit):
 	lefty = nonzeroy[left_lane_inds] 
 	rightx = nonzerox[right_lane_inds]
 	righty = nonzeroy[right_lane_inds]
+
 	# Fit a second order polynomial to each
-	left_fit = np.polyfit(lefty, leftx, 2)
-	right_fit = np.polyfit(righty, rightx, 2)
+	left_points = {'x': leftx,'y': lefty}
+	right_points = {'x': rightx, 'y': righty } 
+	
 	# Generate x and y values for plotting
-	ploty = np.linspace(0, img.shape[0]-1, img.shape[0] )
-	left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
-	right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
-	return {'left':left_points,
-		    'right':right_points, 
-			'out_img': out_img}
+	# ploty = np.linspace(0, img.shape[0]-1, img.shape[0] )
+	# left_fitx = left_fit[0]*ploty**2 + left_fit[1]*ploty + left_fit[2]
+	# right_fitx = right_fit[0]*ploty**2 + right_fit[1]*ploty + right_fit[2]
+	return {'left':left_points, 'right':right_points}
 
 
-def calculate_curvature2(img_shape, points):
+def calculate_curvature(img_shape, points):
 	"""
 	Returns the curvature of the polynomial `fit` on the y range `yRange`.
 	"""
