@@ -121,5 +121,10 @@ Here's a [link to my video result](./project_video_output.mp4)
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+Some of the challenges that I have faced in this project:
+1- RGB and BGR color transformation when dealing with images read by matplotlib and cv2 library
+2- Handling noise measurements resulted from inaccurate curvature measurements. I have decideded to use a Lane class to keep track of the measurements by storing a history of previous calculations and then use median operation to reject outliers. Also, to smooth the radius calculation further, I am taking the average of right and left curvature radius.
+3- Deciding on the appropriate combination of gradient detectors was through trial and error. I have found that direction detector was redundant and kept only xy detector in combination with color and apply masking for black pixels. This combination appears to yield robust result. Direction detector can be limiting when dealing with sharp turns.
+4- Future imrpovement may include using sanity check on the detected line points to calculate the curvature only upon their pass of that check. This check is partially implemented in Line class.
+
 
