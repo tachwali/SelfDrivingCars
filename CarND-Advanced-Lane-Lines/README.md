@@ -17,13 +17,13 @@ The goals / steps of this project are the following:
 * Output visual display of the lane boundaries and numerical estimation of lane curvature and vehicle position.
 
 [//]: # (Image References)
-
-[image1]: ./output_images/Undistorted_Image.jpg "Undistorted"
-[image2]: ./output_images/Detected_Image.jpg "Road Transformed"
-[image3]: ./output_images/Transformed_Image.jpg "Binary Example"
-[image4]: ./output_images/Lane_Detection_Image.jpg "Warp Example"
-[image5]: ./output_images/Filled_Image.jpg "Fit Visual"
-[image6]: ./output_images/Edited_Image.jpg "Output"
+[image1]: ./output_images/calibration_image.jpg "Calibration"
+[image2]: ./output_images/Undistorted_Image.jpg "Undistorted"
+[image3]: ./output_images/Detected_Image.jpg "Road Transformed"
+[image4]: ./output_images/Transformed_Image.jpg "Binary Example"
+[image5]: ./output_images/Lane_Detection_Image.jpg "Warp Example"
+[image6]: ./output_images/Filled_Image.jpg "Fit Visual"
+[image7]: ./output_images/Edited_Image.jpg "Output"
 [video1]: ./project_video_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -42,11 +42,18 @@ You're reading it!
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
 
-The code for this step is contained in the first code cell of the IPython notebook located in "./examples/example.ipynb" (or in lines # through # of the file called `some_file.py`).  
+The code for this step is contained in the Camera calibration section of the IPython notebook located in "./Advanced_Find_Lanes.ipynb" and camera calibration functions in camera.py module.  
 
-I start by preparing "object points", which will be the (x, y, z) coordinates of the chessboard corners in the world. Here I am assuming the chessboard is fixed on the (x, y) plane at z=0, such that the object points are the same for each calibration image.  Thus, `objp` is just a replicated array of coordinates, and `objpoints` will be appended with a copy of it every time I successfully detect all chessboard corners in a test image.  `imgpoints` will be appended with the (x, y) pixel position of each of the corners in the image plane with each successful chessboard detection.  
+The calibration is performed on a list of calibration images. Each image shows a chessboard at a different orientation. The calibration process is comprised of two stages:
 
-I then used the output `objpoints` and `imgpoints` to compute the camera calibration and distortion coefficients using the `cv2.calibrateCamera()` function.  I applied this distortion correction to the test image using the `cv2.undistort()` function and obtained this result: 
+1) Convert the image to gray: To convert the image from 3D to 2D. The calibration process is the same in all image channels.
+
+2) Find chessboard corners: By finding the (x,y) coordinates of the chessboard corners. This process is performed on all calibration images to collect a list of chesscorners at different orientations.
+
+3) Camera clibration: which is the process that takes all corners found in step 2) and the the ideal corner locations and return the calibration matrix that can be used to correct (undistort) images taken by the same camera used to take the calibration images
+
+The code below iterates over all calibration images and then undistort them using the calibration matrix "mtx" found by cv2.calibrateCamera function.
+obtained this result: 
 
 ![alt text][image1]
 
@@ -59,7 +66,7 @@ To demonstrate this step, I will describe how I apply the distortion correction 
 
 #### 2. Describe how (and identify where in your code) you used color transforms, gradients or other methods to create a thresholded binary image.  Provide an example of a binary image result.
 
-I used a combination of color and gradient thresholds to generate a binary image (thresholding steps at lines # through # in `another_file.py`).  Here's an example of my output for this step.  (note: this is not actually from one of the test images)
+I used a combination of color and gradient thresholds to generate a binary image. Those thresholding operations are done in detectors functions that can be found in `pipeline_functions.py` module. 
 
 ![alt text][image3]
 
