@@ -24,6 +24,7 @@ The goals / steps of this project are the following:
 [image5]: ./output_images/Lane_Detection_Image.jpg "Warp Example"
 [image6]: ./output_images/Filled_Image.jpg "Fit Visual"
 [image7]: ./output_images/Edited_Image.jpg "Output"
+[image8]: ./examples/warped_straight_lines.jpg "Warped Reference"
 [video1]: ./project_video_output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
@@ -72,49 +73,39 @@ I used a combination of color and gradient thresholds to generate a binary image
 
 #### 3. Describe how (and identify where in your code) you performed a perspective transform and provide an example of a transformed image.
 
-The code for my perspective transform includes a function called `warper()`, which appears in lines 1 through 8 in the file `example.py` (output_images/examples/example.py) (or, for example, in the 3rd code cell of the IPython notebook).  The `warper()` function takes as inputs an image (`img`), as well as source (`src`) and destination (`dst`) points.  I chose the hardcode the source and destination points in the following manner:
+The code for my perspective transform includes a function called `transform_image()`, which can be found in `pipeline_functions.py` module. This function takes as inputs an image (`img`), and assume source (`src`) and destination (`dst`) points based on warped_straight_lines.jpg example image in the "example" folder shown below:
+
+![alt text][image8]
+
+I chose the hardcode the source and destination points in the following manner:
 
 ```python
-src = np.float32(
-    [[(img_size[0] / 2) - 55, img_size[1] / 2 + 100],
-    [((img_size[0] / 6) - 10), img_size[1]],
-    [(img_size[0] * 5 / 6) + 60, img_size[1]],
-    [(img_size[0] / 2 + 55), img_size[1] / 2 + 100]])
-dst = np.float32(
-    [[(img_size[0] / 4), 0],
-    [(img_size[0] / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), img_size[1]],
-    [(img_size[0] * 3 / 4), 0]])
+src = np.array([[205, 720], [1120, 720], [745, 480], [550, 480]], np.float32)
+dst = np.array([[205, 720], [1120, 720], [1120, 0], [205, 0]], np.float32)
 ```
 
-This resulted in the following source and destination points:
-
-| Source        | Destination   | 
-|:-------------:|:-------------:| 
-| 585, 460      | 320, 0        | 
-| 203, 720      | 320, 720      |
-| 1127, 720     | 960, 720      |
-| 695, 460      | 960, 0        |
-
-I verified that my perspective transform was working as expected by drawing the `src` and `dst` points onto a test image and its warped counterpart to verify that the lines appear parallel in the warped image.
+I verified that my perspective transform was working by applying the `transform_image()` function on the detection binary image displayed earlier and obtained the following warped image:
 
 ![alt text][image4]
 
 #### 4. Describe how (and identify where in your code) you identified lane-line pixels and fit their positions with a polynomial?
 
-Then I did some other stuff and fit my lane lines with a 2nd order polynomial kinda like this:
+Then the lines of the road are detected using histogram of a portion if the image. The peaks at the left and right of the histogram resembles the location of lines. A sliding window method is used to determine the lines location at different locations along the y axes of the image. The nonzero pixles around the line location are kept as a result of this method. The implementation of this method can be found in function `get_left_right_lane_points` in `pipeline_functions.py` module. The result of this detection algorithm can be shown in the image below:
 
 ![alt text][image5]
 
 #### 5. Describe how (and identify where in your code) you calculated the radius of curvature of the lane and the position of the vehicle with respect to center.
 
-I did this in lines # through # in my code in `my_other_file.py`
+The curvature radius calculation is estimated based on the line points detected by the line detection algorithm described earlier. A second order polynomial coefficients are estimated to fit those points based on least mean square error criteion. A scaling factor is applied to idences of the line points to translate them into metric scale. The equation and scaling factor used to calculate the radius of left and right lines can be found in function `calculate_curvature` in `pipeline_functions.py` module. In addition, the distance from road center is also calculated in that function. 
 
 #### 6. Provide an example image of your result plotted back down onto the road such that the lane area is identified clearly.
-
-I implemented this step in lines # through # in my code in `yet_another_file.py` in the function `map_lane()`.  Here is an example of my result on a test image:
+I implemented this step using function `fill_area` in `viz.py` module. Here is an example of my result on a test image:
 
 ![alt text][image6]
+
+and the estimated measurements are also displayed then on the image as shown below:
+
+![alt text][image7]
 
 ---
 
@@ -122,7 +113,7 @@ I implemented this step in lines # through # in my code in `yet_another_file.py`
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./project_video_output.mp4)
 
 ---
 
