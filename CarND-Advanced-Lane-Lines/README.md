@@ -39,6 +39,16 @@ The goals / steps of this project are the following:
 
 You're reading it!
 
+Note that this submission also include the following python modules:
+
+1-camera.py: camera calibration functions
+
+2-pipeline_functions.py: line detection algorithms
+
+3-lane.py: lane object to keep track of line detection along multiple images 
+
+4-viz.py: visualization helper functions
+
 ### Camera Calibration
 
 #### 1. Briefly state how you computed the camera matrix and distortion coefficients. Provide an example of a distortion corrected calibration image.
