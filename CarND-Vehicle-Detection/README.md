@@ -26,8 +26,9 @@ The steps of this project are the following:
 * Step2: Feature Extraction:  Perform a Histogram of Oriented Gradients (HOG) feature extraction as well as colot and spatial bin information of each image
 * Step3: Classifier selection and training
 * Step4: Develop window search algorithm 
- use your trained classifier to search for vehicles in images.
-* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
+* Step5: Develop video stream processing pipeline
+
+Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
 * Estimate a bounding box for vehicles detected.
 
 
@@ -35,19 +36,19 @@ The steps of this project are the following:
 ---
 
 [//]: # (Image References)
-[image1]: ./output_images/car_image.png
+[image1]: ./output_images/car_image.jpg
 [image2]: ./output_images/car_HOG_image.jpg
-[image2]: ./output_images/notcar_image.jpg
-[image2]: ./output_images/notcar_HOGimage.jpg
-[image3]: ./output_images/sliding_window_0.jpg 
-[image4]: ./output_images/sliding_window_1.jpg
-[image4]: ./output_images/sliding_window_2.jpg
-[image4]: ./output_images/sliding_window_3.jpg
-[image4]: ./output_images/sliding_window_4.jpg
-[image4]: ./output_images/sliding_window_5.jpg
-[image5]: ./output_images/bboxes_and_heat.png
-[image6]: ./output_images/labels_map.png
-[image7]: ./output_images/output_bboxes.png
+[image3]: ./output_images/notcar_image.jpg
+[image4]: ./output_images/notcar_HOGimage.jpg
+[image5]: ./output_images/sliding_window_0.jpg 
+[image6]: ./output_images/sliding_window_1.jpg
+[image7]: ./output_images/sliding_window_2.jpg
+[image8]: ./output_images/sliding_window_3.jpg
+[image9]: ./output_images/sliding_window_4.jpg
+[image10]: ./output_images/sliding_window_5.jpg
+[image11]: ./output_images/bboxes_and_heat.png
+[image12]: ./output_images/labels_map.png
+[image13]: ./output_images/output_bboxes.png
 [video1]: ./output_images/final_output_project_video.mp4
 
 
@@ -64,7 +65,18 @@ The code for this step is contained in the first code cell of the IPython notebo
 
 I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
 
+
 ![alt text][image1]
+
+
+![alt text][image2]
+
+
+![alt text][image3]
+
+
+![alt text][image4]
+
 
 I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
 
@@ -134,4 +146,3 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 5-increasing the overlap will increase the multiple detection over the same car
 6- the size of the window was also important in obtaining good detection
-
