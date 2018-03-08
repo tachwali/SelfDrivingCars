@@ -22,8 +22,8 @@ The Project
 
 The steps of this project are the following:
 
-* Step1: Reading training images and obtain basic information about those images such as number of samples and image sizes.
-* Step2: Feature Extraction:  Perform a Histogram of Oriented Gradients (HOG) feature extraction as well as colot and spatial bin information of each image
+* Step1: Reading training images 
+* Step2: Feature Extraction  
 * Step3: Classifier selection and training
 * Step4: Develop window search algorithm 
 * Step5: Develop video stream processing pipeline
@@ -52,52 +52,48 @@ Run your pipeline on a video stream (start with the test_video.mp4 and later imp
 [video1]: ./output_images/final_output_project_video.mp4
 
 
----
-
-
-## Step 1: 
-
 ### Histogram of Oriented Gradients (HOG)
 
 #### 1. Explain how (and identify where in your code) you extracted HOG features from the training images.
 
-The code for this step is contained in the first code cell of the IPython notebook (or in lines # through # of the file called `some_file.py`).  
+First, the training images are analyzed initially to check for :
 
-I started by reading in all the `vehicle` and `non-vehicle` images.  Here is an example of one of each of the `vehicle` and `non-vehicle` classes:
+* Balanced training data: There are equal number of images for vehicle and non-vehicle images.
+* Size of training images: To understand the scale (dimension) of input data. Each training image is found to be 64x64 pixels.
 
+Three features were extracted from each image: color, spatial and HOG features. The feature extraction code can be found in [features.py](./features.py). 
 
-![alt text][image1]
+The color features are extracted after converting each image into another color space that is less sensitive to brightness variation. YCrCb, HLS, and HSV are among the color spaces that are decouple color information from brightness information. However, YCrCb was chosen due its faster computational performance. A histogram of 32 bins is extracted for each of the three channels in the image. This yields a color feature vector of 32x3 = 96 color features
 
+The spatial information is also extracted by taking a downsampled and flattened version (32x32x3) of the image. This yields spatial features of size 3072
 
-![alt text][image2]
-
-
-![alt text][image3]
-
-
-![alt text][image4]
+The hog features are the last set of features extracted from the image. The number of possible orientations used was 9 which is a typical number used between the range of 6 and 12. Also, 8 pixels per cells and 2 cell per blocks were used in the setting of HOG feature extraction. This results in 7×7×2×2×9 = 1764 HOG feature samples. Since this extraction is done for all three channels, then the total number of HOG features is 1764x3 = 5292. Examples of HOG information are shown below:
 
 
-I then explored different color spaces and different `skimage.hog()` parameters (`orientations`, `pixels_per_cell`, and `cells_per_block`).  I grabbed random images from each of the two classes and displayed them to get a feel for what the `skimage.hog()` output looks like.
-
-Here is an example using the `YCrCb` color space and HOG parameters of `orientations=8`, `pixels_per_cell=(8, 8)` and `cells_per_block=(2, 2)`:
+![alt text][image1]  ![alt text][image2]
 
 
-![alt text][image2]
+![alt text][image3]  ![alt text][image4]
+
+
+Note: It seems there is no direct way to use imwrite an image after applying hot color-map to appear in the same way as it is shown with imshow. To better see the HOG features extracted, refer to the project notebook. 
+
+In summary, the size of feature vector per image is 96 + 3072 + 5292 = 8460. This size is believed to be very excessive and should be reduced to be much less than the input image size (4096 pixels). However, due to the lack of time, I continued with using this feature vector since it yields good classification performance. 
+
 
 #### 2. Explain how you settled on your final choice of HOG parameters.
 
-I tried various combinations of parameters and...
+I have initally used number of orientation to be 12. However, that made the feature vector size really huge and resulted in uncessarily long training time. Two cell per block seems to be a typical initial setting while 8 pixel per cell was a number that divides 64 (image side length). 
 
 #### 3. Describe how (and identify where in your code) you trained a classifier using your selected HOG features (and color features if you used them).
 
-I trained a linear SVM using...
+I have used GridSearchCV to search for the best classifier setting. I function returns SVM classifier with RBF kernel and C = 10 to be the classifier with best test performance. However, I found that it runs much slower than Linear SVM.
 
 ### Sliding Window Search
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
-I decided to search random window positions at random scales all over the image and came up with this (ok just kidding I didn't actually ;):
+
 
 ![alt text][image3]
 
