@@ -40,15 +40,12 @@ Run your pipeline on a video stream (start with the test_video.mp4 and later imp
 [image2]: ./output_images/car_HOG_image.jpg
 [image3]: ./output_images/notcar_image.jpg
 [image4]: ./output_images/notcar_HOGimage.jpg
-[image5]: ./output_images/sliding_window_0.jpg 
+[image5]: ./output_images/sliding_window_0.jpg
 [image6]: ./output_images/sliding_window_1.jpg
 [image7]: ./output_images/sliding_window_2.jpg
 [image8]: ./output_images/sliding_window_3.jpg
 [image9]: ./output_images/sliding_window_4.jpg
 [image10]: ./output_images/sliding_window_5.jpg
-[image11]: ./output_images/bboxes_and_heat.png
-[image12]: ./output_images/labels_map.png
-[image13]: ./output_images/output_bboxes.png
 [video1]: ./output_images/final_output_project_video.mp4
 
 
@@ -93,40 +90,30 @@ I have used GridSearchCV to search for the best classifier setting. I function r
 
 #### 1. Describe how (and identify where in your code) you implemented a sliding window search.  How did you decide what scales to search and how much to overlap windows?
 
+The window search code can be found in [search.py](./search.py). The window search is limited to the lower half of the image to avoid false alarm comings from the top half of the image and to speed processing and feature extractions. The window size is set to 96 and overlap of 0.5. Larger overlap ration caused misdetection at that window size. This setting result is shown below. Note that this overlap setting caused multiple detections which could be cleaned up later through heatmap and thresholding. Below is the detection result using this setting.
 
+![alt text][image5]  ![alt text][image6]  ![alt text][image7]
 
-![alt text][image3]
+![alt text][image8]  ![alt text][image9]  ![alt text][image10]
+
 
 #### 2. Show some examples of test images to demonstrate how your pipeline is working.  What did you do to optimize the performance of your classifier?
 
-Ultimately I searched on two scales using YCrCb 3-channel HOG features plus spatially binned color and histograms of color in the feature vector, which provided a nice result.  Here are some example images:
+The implementation of car detector is found in [detection.py](./detection.py). The pipeline starts by extacting the lower half of the image and, with the exception of HOG features, all other features described earlier are extracted through a window size 64x64 that matches the input training image size. HOG features are extracted once for the entire image and we extract the related portion of those features for the window being analyzed. Then detection is applied using the SVM RBF classifier and a heatmap is build to track the number of multiple detection that could be applied to the same car due to overlapping window search. To obtain the binary detection image, instead of using direct thresholding, the label function is used from scipy.ndimage.measurements module, which allows to distinguish between different vehicle detections by yielding different label regions (blobs) that corresponds to each vehicle. Then a bounding box is extracted for each region seperately using draw_labeled_boxes function from [viz.py](./viz.py)
 
-![alt text][image4]
 ---
 
 ### Video Implementation
 
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (somewhat wobbly or unstable bounding boxes are ok as long as you are identifying the vehicles most of the time with minimal false positives.)
-Here's a [link to my video result](./project_video.mp4)
+Here's a [link to my video result](./output_images/final_output_project_video.mp4)
 
 
 #### 2. Describe how (and identify where in your code) you implemented some kind of filter for false positives and some method for combining overlapping bounding boxes.
 
-I recorded the positions of positive detections in each frame of the video.  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap.  I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
+As described in the pipeline implementation. The positions of positive detections in each frame of the video are obtained. Then, a heatmap is created  From the positive detections I created a heatmap and then thresholded that map to identify vehicle positions.  I then used `scipy.ndimage.measurements.label()` to identify individual blobs in the heatmap. I then assumed each blob corresponded to a vehicle.  I constructed bounding boxes to cover the area of each blob detected.  
 
-Here's an example result showing the heatmap from a series of frames of video, the result of `scipy.ndimage.measurements.label()` and the bounding boxes then overlaid on the last frame of video:
-
-### Here are six frames and their corresponding heatmaps:
-
-![alt text][image5]
-
-### Here is the output of `scipy.ndimage.measurements.label()` on the integrated heatmap from all six frames:
-![alt text][image6]
-
-### Here the resulting bounding boxes are drawn onto the last frame in the series:
-![alt text][image7]
-
-
+The results that show the heatmap from testing images can be found in the notebook.
 
 ---
 
@@ -134,11 +121,16 @@ Here's an example result showing the heatmap from a series of frames of video, t
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
+The following implementation issues were found during working on this project:
 
-1- set HOG 1-2 cell sizes similar to car features : e.g. 1 x cell == tail light. 2 x cells == registration plate.
-2- set HOG block size should be roughly able to capture the larger car features e.g. back window, door, bumper, etc.
-3- Warning: when dealing with image data that was extracted from video, you may be dealing with sequences of images where your target object (vehicles in this case) appear almost identical in a whole series of images. In such a case, even a randomized train-test split will be subject to overfitting because images in the training set may be nearly identical to images in the test set. For the subset of images used in the next several quizzes, this is not a problem, but to optimize your classifier for the project, you may need to worry about time-series of images!
-4-If you have to append training data then make sure to cut it at 64x64 since search windows asssume that
+1- Setting HOG cell sizes should be similar to car features : e.g. 1 x cell == tail light. 2 x cells == registration plate.
 
-5-increasing the overlap will increase the multiple detection over the same car
-6- the size of the window was also important in obtaining good detection
+2- Setting HOG block size should be roughly able to capture the larger car features e.g. back window, door, bumper, etc.
+
+3- When dealing with image data that was extracted from video, the classifier is dealing with sequences of images where the target object (vehicles in this case) appear almost identical in a whole series of images. In such a case, even a randomized train-test split will be subject to overfitting because images in the training set may be nearly identical to images in the test set. For the subset of images used in the next several quizzes, this is not a problem, but to optimize your classifier for the project, time-series of images should be avoided.
+
+4- When trying to augment training data, I have to make sure to cut additional images at 64x64 since search windows and remaining training images are at that size.
+
+5- Increasing the overlap will increase the multiple detection over the same car
+
+6- The size of the window was very critical and sensitive parameter in obtaining good detection.
