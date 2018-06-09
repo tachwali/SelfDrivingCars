@@ -1,6 +1,6 @@
 #include "kalman_filter.h"
 #include <iostream>
-
+#include <math.h>
 using Eigen::MatrixXd;
 using Eigen::VectorXd;
 
@@ -72,6 +72,8 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
     z_pred << rho, theta, rho_dot;
   }    
 
+
+
   /*
     update the state by using Extended Kalman Filter equations
   */
@@ -80,7 +82,19 @@ void KalmanFilter::UpdateEKF(const VectorXd &z) {
 	MatrixXd S = H_ * P_ * Ht + R_;
 	MatrixXd K = P_ * Ht * S.inverse();
 
-
+  // make sure y is within -pi to pi range
+  bool in_range = false;
+    while (in_range == false) {
+      if (y(1) > M_PI) {
+        y(1) = y(1) - 2*M_PI;
+      }
+      else if (y(1) < -M_PI) {
+        y(1) = y(1) + 2*M_PI;
+      } 
+	  else {
+        in_range = true;
+      }
+  }
   //new estimate
 	x_ = x_ + (K * y);
 	P_ = (I - K * H_) * P_; 
