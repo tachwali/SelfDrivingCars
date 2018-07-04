@@ -24,10 +24,10 @@ UKF::UKF() {
   P_ = MatrixXd(5, 5);
 
   // Process noise standard deviation longitudinal acceleration in m/s^2
-  std_a_ = 2;
+  std_a_ = 3;
 
   // Process noise standard deviation yaw acceleration in rad/s^2
-  std_yawdd_ = 0.3;
+  std_yawdd_ = 0.5;
   
   // Laser measurement noise standard deviation position1 in m
   std_laspx_ = 0.15;
@@ -79,51 +79,68 @@ UKF::~UKF() {}
  * either radar or laser.
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
-  if (!is_initialized_) {
-    P_ = MatrixXd(5, 5);
-    P_ <<   1, 0,  0,  0,  0,
+  //Initialization//
+
+  // skip processing if the both sensors are ignored
+  if ((meas_package.sensor_type_ == MeasurementPackage::RADAR && use_radar_) ||
+      (meas_package.sensor_type_ == MeasurementPackage::LASER && use_laser_))
+  {
+
+
+    if (!is_initialized_)
+    {
+      P_ = MatrixXd(5, 5);
+      P_ <<   1, 0,  0,  0,  0,
             0,  1, 0,  0,  0,
             0,  0,  1, 0,  0,
             0,  0,  0,  1, 0,
             0,  0,  0,  0,  1;
-          // first measurement
-    x_ << 1, 1, 1, 1, 0.1;
 
-    if (meas_package.sensor_type_ == MeasurementPackage::RADAR) {
-      
-      // Convert radar from polar to cartesian coordinates and initialize state.
-      float rho = meas_package.raw_measurements_(0);
-      float phi = meas_package.raw_measurements_(1);
-      float px = rho * cos(phi);
-      float py = rho * sin(phi);
-      x_(0) = px;
-      x_(1) = py;
-    } 
-    else if (meas_package.sensor_type_ == MeasurementPackage::LASER) {
-      auto x = meas_package.raw_measurements_[0];
-      auto y = meas_package.raw_measurements_[1];
-      x_(0) = x;
-      x_(1) = y;
+      if (meas_package.sensor_type_ == MeasurementPackage::LASER && use_laser_)
+      {
+        //Initialize state.
+        x_(0) = meas_package.raw_measurements_(0);
+        x_(1) = meas_package.raw_measurements_(1);
+
+      }
+      else if (meas_package.sensor_type_ == MeasurementPackage::RADAR && use_radar_)
+      {
+        // Convert polar to cartesian coordinates
+        float rho = meas_package.raw_measurements_(0);
+        float theta = meas_package.raw_measurements_(1);
+
+        // initialize state
+        x_(0) = rho * cos(theta);
+        x_(1) = rho * sin(theta);
+      }
+
+      time_us_ = meas_package.timestamp_;
+
+      is_initialized_ = true;
+
+      return;
     }
 
-    previous_timestamp_ = meas_package.timestamp_;
-    is_initialized_ = true;
+    //Prediction//
 
-    return;
+    //compute the time elapsed between the current and previous measurements
+    float dt = (meas_package.timestamp_ - time_us_) / 1000000.0; //dt - expressed in seconds
+    time_us_ = meas_package.timestamp_;
+    Prediction(dt);
+
+
+
+    //Update//
+
+    if (meas_package.sensor_type_ == MeasurementPackage::LASER)
+    {
+      UpdateLidar(meas_package);
+    }
+    else if (meas_package.sensor_type_ == MeasurementPackage::RADAR)
+    {
+      UpdateRadar(meas_package);
+    }
   }
-
-  double delta_t =  (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
-  
-  Prediction(delta_t);
-
-  if ( meas_package.sensor_type_ == MeasurementPackage::RADAR && use_radar_ ) {
-    UpdateRadar(meas_package);
-  } 
-  else if ( meas_package.sensor_type_ == MeasurementPackage::LASER && use_laser_ ) {
-    UpdateLidar(meas_package);
-  }
-  previous_timestamp_ = meas_package.timestamp_;
-  return;
 }
  
 /**
