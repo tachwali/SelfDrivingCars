@@ -96,3 +96,36 @@ still be compilable with cmake and make./
 ## How to write a README
 A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
 
+# [Rubric](https://review.udacity.com/#!/rubrics/824/view) points
+
+## Compilation
+
+### Your code should compile.
+
+The code compiles without errors or warnings. No modifications were done on the provided setup.
+
+## Implementation
+
+### The PID procedure follows what was taught in the lessons.
+
+The PID implementation is done on the [./src/PID.cpp](./src/PID.cpp). The [PID::UpdateError](./src/PID.cpp#L19) method calculates proportional, integral and derivative errors and the [PID::TotalError](./src/PID.cpp#L25) calculates the total error using the appropriate coefficients.
+
+## Reflection
+
+### Describe the effect each of the P, I, D components had in your implementation.
+
+- The PID controller takes an error signal as an input and produces a steering signal at the output. The error is measured by the deviation of the car from center line.
+
+- The PID controller has three gains that maps different properties of the error signal to an appropriate correcting steering signal.
+
+1- The proportional gain (P) makes the steering signal propotional to the error value directly. This gain alone lacks the ability to correct for small errors or biases and can cause an overshoot for sudden large errors.
+
+2- The integral gain (I) corrects for the bias problem since it makes the steering signal propotional to the integral of error over time. So, when there is a small error or bias, it will grow over time due to the integration until it becomes large enough to produce a steering signal that is sufficient to correct the error.
+
+3- The differential gain (D) corrects the overshooting problem since it links the steering signal to the rate of change of error signal. So, when the error changes rapidly, it is possible to build a component of the steering signal to slow it down (reduce the total amount). 
+
+### Describe how the final hyperparameters were chosen.
+
+The twiddle method was used. I started by setting the proportional gain alone. I continued to increase the gain until the car started to overshoot (go offroad on turns). Then I reduced the gain to 0.75 of the value I got with overshooting and added integral gain (I) until the car start to overshoot again. Then I added the differential gain to overcome the overshooting. The final parameters where [P: 0.1, I: 0.005, D: 4.0].
+
+
