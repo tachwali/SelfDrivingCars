@@ -114,7 +114,7 @@ The state value (true or false) is calculated based on the lane each other car i
 
 A car is considered "dangerous" when its distance to our car is less than 30 meters (either in front or behind us).
 
-### Behavior planning [line 5 to line 37](./src/behviour.cpp#L293)
+### Behavior planning [line 5 to line 37](./src/behviour.cpp#L5)
 This stage determines the car actions :
   - lane_change: if there is a car ahead, is changing lane safe? 
   - speed_diff: how much do we speed up or slow down?
