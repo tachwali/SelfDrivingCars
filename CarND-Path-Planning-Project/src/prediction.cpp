@@ -2,7 +2,7 @@
 #include <math.h>
 
 
-carStates predict(std::vector<std::vector<float>> sensor_fusion, int lane, int car_s, size_t prev_size)
+carStates predict(std::vector<std::vector<float>> sensor_fusion, int lane, int car_s, std::size_t prev_size)
 {
     carStates car_states = {false, false, false};
     for ( int i = 0; i < sensor_fusion.size(); i++ ) {

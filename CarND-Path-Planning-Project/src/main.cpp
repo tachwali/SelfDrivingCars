@@ -1,5 +1,4 @@
 #include <fstream>
-#include <math.h>
 #include <uWS/uWS.h>
 #include <chrono>
 #include <iostream>
